@@ -37,6 +37,12 @@
     {{ if .Image }}
     <h3 class="title">Preview</h3>
     <img src="{{ .Src }}" style="border: 3px solid black" />
+    {{ else if .Pdf}}
+    <div>
+      <object data="{{ .InlineSrc }}" type="application/pdf" style="min-height:100vh;width:100%">
+        <p>Unable to preview PDF file.</p>
+      </object>
+    </div>
     {{ end }}
   </body>
 </html>

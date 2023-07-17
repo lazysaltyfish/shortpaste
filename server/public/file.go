@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"path/filepath"
 	"shortpaste/core/config"
 	"shortpaste/core/database"
 	"shortpaste/core/tools"
@@ -12,6 +13,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 )
+
+const PdfExt = ".pdf"
 
 func FileGet(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
@@ -24,8 +27,11 @@ func FileGet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	filePath := path.Join(config.GetDataDirPath(), "files", file.ID, file.Name)
+	// Currently not be used by this page.
 	_, isDownload := r.URL.Query()["download"]
+
 	_, isView := r.URL.Query()["view"]
+	_, isInline := r.URL.Query()["inline"]
 	if isDownload || isView {
 		if isDownload {
 			file.DownloadCount += 1
@@ -33,6 +39,10 @@ func FileGet(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.Header().Set("Content-Disposition", "attachment; filename="+file.Name)
+		http.ServeFile(w, r, filePath)
+		return
+	} else if isInline {
+		w.Header().Set("Content-Disposition", "inline")
 		http.ServeFile(w, r, filePath)
 		return
 	}
@@ -53,12 +63,16 @@ func FileGet(w http.ResponseWriter, r *http.Request) {
 	data := struct {
 		Name  string
 		Src   string
+		InlineSrc string
 		Image bool
+		Pdf   bool
 		Size  string
 	}{
 		Name:  file.Name,
 		Src:   "/f/" + id + "?view",
+		InlineSrc: "/f/" + id + "?inline",
 		Image: strings.HasPrefix(file.MIME, "image/"),
+		Pdf:   filepath.Ext(file.Name) == PdfExt,
 		Size:  tools.IECFormat(fi.Size()),
 	}
 	t.Execute(w, data)
