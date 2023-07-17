@@ -1,4 +1,4 @@
-name: docker-image
+name: run-tests
 
 on:
     pull_request:
