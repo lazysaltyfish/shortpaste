@@ -43,6 +43,11 @@
         <p>Unable to preview PDF file.</p>
       </object>
     </div>
+    {{ else if .Video }}
+    <video width="1280" height="720" controls>
+      <source src="{{ .InlineSrc }}" type="video/mp4">
+        Your browser does not support play video. Please download it.
+    </video>
     {{ end }}
   </body>
 </html>
