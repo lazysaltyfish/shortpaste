@@ -15,6 +15,8 @@ import (
 )
 
 const PdfExt = ".pdf"
+const Mp4Ext = ".mp4"
+const MkvExt = ".mkv"
 
 func FileGet(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
@@ -60,19 +62,22 @@ func FileGet(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	fileExt := filepath.Ext(file.Name)
 	data := struct {
 		Name  string
 		Src   string
 		InlineSrc string
 		Image bool
 		Pdf   bool
+		Video bool
 		Size  string
 	}{
 		Name:  file.Name,
 		Src:   "/f/" + id + "?view",
 		InlineSrc: "/f/" + id + "?inline",
 		Image: strings.HasPrefix(file.MIME, "image/"),
-		Pdf:   filepath.Ext(file.Name) == PdfExt,
+		Pdf:   fileExt == PdfExt,
+		Video: fileExt == Mp4Ext || fileExt == MkvExt,
 		Size:  tools.IECFormat(fi.Size()),
 	}
 	t.Execute(w, data)
